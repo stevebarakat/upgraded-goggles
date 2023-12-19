@@ -1,5 +1,5 @@
 import { PlayerContext } from "@/machines/playerMachine";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { roundFourth } from "@/utils";
 import localforage from "localforage";
 
@@ -11,7 +11,7 @@ function useAutomationData() {
   });
   const volume: number = state.context.volume;
   useWrite({ value: volume });
-  // useRead();
+  useRead();
   return null;
 }
 
@@ -29,7 +29,7 @@ function useWrite({ value }: Props) {
     const loop = t.scheduleRepeat(
       () => {
         const time: number = roundFourth(t.seconds);
-        data.set(time, { id: 0, time, value });
+        data.set(time, { time, value });
         localforage.setItem("volumeData", data);
       },
       0.25,
@@ -45,37 +45,36 @@ function useWrite({ value }: Props) {
 }
 
 // !!! --- READ --- !!! //
-// function useRead() {
-//   const { send } = PlayerContext.useActorRef();
-//   const state = PlayerContext.useSelector((state) => state);
-//   const t = state.context.t;
-//   const isReading = state.matches({ ready: { automationMode: "reading" } });
+function useRead() {
+  const [volumeData, setVolumeData] = useState();
+  const { send } = PlayerContext.useActorRef();
+  const state = PlayerContext.useSelector((state) => state);
+  const t = state.context.t;
+  const isReading = state.matches({ ready: { automationMode: "reading" } });
 
-//   const setVolume = useCallback(
-//     (data: { time: number; value: number }) => {
-//       t.schedule(() => {
-//         if (!isReading) return;
+  const setVolume = useCallback(
+    (data: { time: number; value: number }) => {
+      t.schedule(() => {
+        if (!isReading) return;
 
-//         send({
-//           type: "setVolume",
-//           volume: data.value,
-//         });
-//       }, data.time);
-//     },
-//     [isReading, send, t]
-//   );
+        send({
+          type: "setVolume",
+          volume: data.value,
+        });
+      }, data.time);
+    },
+    [isReading, send, t]
+  );
 
-//   const volumeData = localStorageGet("volumeData");
+  localforage.getItem("volumeData").then((data) => setVolumeData(data));
 
-//   useEffect(() => {
-//     if (!isReading || !volumeData) return;
-//     const objectToMap = (obj: typeof data) => new Map(Object.entries(obj));
-//     const newVolData = objectToMap(volumeData);
-//     for (const value of newVolData) {
-//       setVolume(value[1]);
-//     }
-//   }, [volumeData, setVolume, isReading]);
+  useEffect(() => {
+    if (!isReading || !volumeData) return;
+    for (const value of volumeData) {
+      setVolume(value[1]);
+    }
+  }, [volumeData, setVolume, isReading]);
 
-//   return null;
-// }
+  return null;
+}
 export default useAutomationData;
