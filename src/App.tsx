@@ -1,11 +1,11 @@
-import Player from "./components/Player";
-import { PlayerContext } from "./machines/playerMachine";
+import Mixer from "./components/Mixer";
+import { MixerContext } from "./machines/mixerMachine";
 
 export const App = () => {
   return (
-    <PlayerContext.Provider>
-      <Player />
-    </PlayerContext.Provider>
+    <MixerContext.Provider>
+      <Mixer />
+    </MixerContext.Provider>
   );
 };
 

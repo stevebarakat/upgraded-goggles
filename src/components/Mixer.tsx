@@ -1,10 +1,10 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import Loader from "@/components/Loader";
 import Transport from "@/components/Transport";
 import Fader from "@/components/Fader";
 
-export default function Player() {
-  const ready = PlayerContext.useSelector((state) => state.matches("ready"));
+export default function Mixer() {
+  const ready = MixerContext.useSelector((state) => state.matches("ready"));
 
   if (ready) {
     return (

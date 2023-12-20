@@ -1,9 +1,9 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import { TransportButton } from "../Buttons";
 import { Square } from "lucide-react";
 
 function Reset() {
-  const { send } = PlayerContext.useActorRef();
+  const { send } = MixerContext.useActorRef();
 
   return (
     <TransportButton

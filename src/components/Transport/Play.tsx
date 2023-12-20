@@ -1,10 +1,10 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import { TransportButton } from "../Buttons";
 import { Play as PlayIcon, Pause as PauseIcon } from "lucide-react";
 
 function Play() {
-  const { send } = PlayerContext.useActorRef();
-  const state = PlayerContext.useSelector((state) => state);
+  const { send } = MixerContext.useActorRef();
+  const state = MixerContext.useSelector((state) => state);
 
   function handleClick() {
     if (!state.matches({ ready: { playbackMode: "playing" } })) {

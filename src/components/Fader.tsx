@@ -1,11 +1,11 @@
 import VuMeter from "@/components/VuMeter";
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import AutomationMode from "./AutomationMode";
 import useAutomationData from "@/hooks/useAutomationData";
 
 export default function Main() {
-  const { send } = PlayerContext.useActorRef();
-  const { volume, meterVal } = PlayerContext.useSelector(
+  const { send } = MixerContext.useActorRef();
+  const { volume, meterVal } = MixerContext.useSelector(
     (state) => state.context
   );
 

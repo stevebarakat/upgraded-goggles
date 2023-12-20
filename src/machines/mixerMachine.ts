@@ -36,7 +36,7 @@ const initialContext: InitialConext = {
   meterVal: 0,
 };
 
-export const playerMachine = createMachine(
+export const mixerMachine = createMachine(
   {
     id: "player",
     context: initialContext,
@@ -247,4 +247,4 @@ export const playerMachine = createMachine(
     delays: {},
   }
 );
-export const PlayerContext = createActorContext(playerMachine);
+export const MixerContext = createActorContext(mixerMachine);

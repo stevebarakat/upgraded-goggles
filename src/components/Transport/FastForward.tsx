@@ -1,9 +1,9 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import { TransportButton } from "../Buttons";
 import { FastForward as FastFwdIcon } from "lucide-react";
 
 export function FastForward() {
-  const { send } = PlayerContext.useActorRef();
+  const { send } = MixerContext.useActorRef();
 
   return (
     <TransportButton

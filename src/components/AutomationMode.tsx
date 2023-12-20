@@ -1,10 +1,10 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import Toggle from "./Buttons/Toggle";
 import { PlayCircle, CircleDot, MinusCircle } from "lucide-react";
 
 function AutomationMode() {
-  const { send } = PlayerContext.useActorRef();
-  const state = PlayerContext.useSelector((state) => state);
+  const { send } = MixerContext.useActorRef();
+  const state = MixerContext.useSelector((state) => state);
 
   function setAutomationMode(e: React.FormEvent<HTMLInputElement>): void {
     const mode: "read" | "write" | "off" = e.currentTarget.value;

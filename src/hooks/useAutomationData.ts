@@ -1,4 +1,4 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import { useEffect, useCallback, useState } from "react";
 import { roundFourth } from "@/utils";
 import localforage from "localforage";
@@ -6,7 +6,7 @@ import localforage from "localforage";
 type Props = { value: number };
 
 function useAutomationData() {
-  const state = PlayerContext.useSelector((state) => {
+  const state = MixerContext.useSelector((state) => {
     return state;
   });
   const volume: number = state.context.volume;
@@ -19,7 +19,7 @@ const data = new Map<number, object>();
 
 // !!! --- WRITE --- !!! //
 function useWrite({ value }: Props) {
-  const state = PlayerContext.useSelector((state) => state);
+  const state = MixerContext.useSelector((state) => state);
   const isWriting = state.matches({ ready: { automationMode: "writing" } });
   const t = state.context.t;
 
@@ -47,8 +47,8 @@ function useWrite({ value }: Props) {
 // !!! --- READ --- !!! //
 function useRead() {
   const [volumeData, setVolumeData] = useState();
-  const { send } = PlayerContext.useActorRef();
-  const state = PlayerContext.useSelector((state) => state);
+  const { send } = MixerContext.useActorRef();
+  const state = MixerContext.useSelector((state) => state);
   const t = state.context.t;
   const isReading = state.matches({ ready: { automationMode: "reading" } });
 

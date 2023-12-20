@@ -1,8 +1,8 @@
-import { PlayerContext } from "@/machines/playerMachine";
+import { MixerContext } from "@/machines/mixerMachine";
 import "./style.css";
 
 function Clock() {
-  const { song, currentTime, t } = PlayerContext.useSelector(
+  const { song, currentTime, t } = MixerContext.useSelector(
     (state) => state.context
   );
 
