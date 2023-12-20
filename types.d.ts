@@ -15,6 +15,15 @@ declare global {
 
   type Fx = Volume | Reverb | FeedbackDelay | PitchShift;
 
+  type InitialConext = {
+    song: SourceSong;
+    channels: Channel[] | [];
+    t: Transport;
+    currentTime: string;
+    volume: number;
+    currentTracks: TrackSettings[];
+  };
+
   type TrackFx = {
     nofx: Volume | null;
     reverb: Reverb | null;

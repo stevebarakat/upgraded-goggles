@@ -1,18 +1,17 @@
-import VuMeter from "@/components/VuMeter";
 import { MixerContext } from "@/machines/mixerMachine";
 
 export default function Fader({ trackId }) {
   const { send } = MixerContext.useActorRef();
-  const { currentTracks, meterVals } = MixerContext.useSelector(
-    (state) => state.context
-  );
+  const state = MixerContext.useSelector((state) => state);
+  const { currentTracks } = state.context;
 
   function setVolume(e: React.FormEvent<HTMLInputElement>): void {
-    send({
-      type: "setTrackVolume",
-      trackId,
-      volume: parseFloat(e.currentTarget.value),
-    });
+    if (state.matches("ready"))
+      send({
+        type: "setTrackVolume",
+        trackId,
+        volume: parseFloat(e.currentTarget.value),
+      });
   }
 
   return (
@@ -22,13 +21,9 @@ export default function Fader({ trackId }) {
           <div className="window">{`${(
             currentTracks[trackId].volume + 100
           ).toFixed(0)} dB`}</div>
-          <VuMeter
-            meterValue={meterVals && meterVals[trackId]}
-            height={250}
-            width={25}
-          />
+
           <input
-            className="range-y volume"
+            className="range-y "
             min={-100}
             max={0}
             step={0.1}

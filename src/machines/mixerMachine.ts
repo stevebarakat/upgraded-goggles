@@ -5,53 +5,21 @@ import { dbToPercent, formatMilliseconds, log } from "@/utils";
 import {
   start as initializeAudio,
   getContext as getAudioContext,
-  Transport,
   Destination,
   Player,
   Channel,
-  Meter,
   loaded,
 } from "tone";
 import { interval, animationFrameScheduler } from "rxjs";
-import { roxanne } from "@/assets/songs";
-import { produce } from "immer";
 
 const audio = getAudioContext();
-
-const currentTracks = roxanne.tracks.map((track) => ({
-  songSlug: "roxanne",
-  ...track,
-  ...defaultTrackData,
-}));
-
-console.log("currentTracks", currentTracks);
-
-type InitialConext = {
-  song: SourceSong;
-  channels: Channel[] | undefined;
-  meters: Meter[] | undefined;
-  t: Transport;
-  currentTime: string;
-  volume: number;
-  meterVals: Float32Array;
-  currentTracks: TrackSettings[];
-};
-
-const initialContext: InitialConext = {
-  song: roxanne,
-  channels: undefined,
-  meters: undefined,
-  t: Transport,
-  currentTime: "00:00:00",
-  volume: -32,
-  meterVals: new Float32Array(currentTracks.length),
-  currentTracks,
-};
 
 export const mixerMachine = createMachine(
   {
     id: "player",
-    context: initialContext,
+    context: ({ input }) => ({
+      ...input,
+    }),
     initial: "idle",
     states: {
       idle: {
@@ -104,19 +72,7 @@ export const mixerMachine = createMachine(
               id: "start.ticker",
               onSnapshot: {
                 actions: assign(({ context }) => {
-                  const meters = context.meters;
-                  const vals = context.meterVals;
-                  console.log("meters", meters);
-                  console.log("vals", vals);
                   context.currentTime = formatMilliseconds(context.t.seconds);
-                  meters?.forEach((meter, i) => {
-                    const val = meter.getValue();
-                    if (context.meterVals) {
-                      vals[i] = val;
-                      context.meterVals = new Float32Array(vals);
-                      // return (meterVals = new Float32Array(vals));
-                    }
-                  });
                 }),
               },
             },
@@ -178,11 +134,6 @@ export const mixerMachine = createMachine(
                   type: "setTrackVolume",
                 },
               },
-              setMeter: {
-                actions: {
-                  type: "setMeter",
-                },
-              },
             },
           },
         },
@@ -201,35 +152,27 @@ export const mixerMachine = createMachine(
         | { type: "fastFwd" }
         | { type: "rewind" }
         | { type: "setVolume"; volume: number }
-        | { type: "setTrackVolume"; volume: number; trackId: number }
-        | { type: "setMeter"; meterVals: Float32Array };
+        | { type: "setTrackVolume"; volume: number; trackId: number };
       guards: { type: "canFF" } | { type: "canRew" };
     },
   },
   {
     actions: {
-      initMixer: ({ context }) => {
+      initMixer: assign(({ context }) => {
         const tracks = context.song.tracks;
         let channels: Channel[] = [];
         let players: Player[] = [];
-        let meters: Meter[] = [];
         tracks?.forEach((track) => {
+          channels = [...channels, new Channel(0).toDestination()];
           players = [...players, new Player(track.path)];
-          meters = [...meters, new Meter(2)];
-          channels = [...channels, new Channel(0)];
         });
-        const chans = players?.map((player, i) => {
-          return (
-            channels &&
-            player.connect(channels[i]).sync().start(0).toDestination()
-          );
+        players?.forEach((player, i) => {
+          channels && player.connect(channels[i]).sync().start(0);
         });
-        chans.forEach((chan, i) => chan.connect(meters[i]).toDestination());
         return {
-          meters,
-          channels: chans,
+          channels,
         };
-      },
+      }),
       play: assign(({ context: { t } }) => {
         if (audio.state === "suspended") {
           initializeAudio();
@@ -251,12 +194,7 @@ export const mixerMachine = createMachine(
       rewind: assign(({ context: { t } }) => {
         t.seconds = t.seconds - 10;
       }),
-      setMeter: assign(({ context, event }) => {
-        if (event.type !== "setMeter") throw new Error();
-        return {
-          meterVals: context.meterVals,
-        };
-      }),
+
       setVolume: assign(({ event }) => {
         if (event.type !== "setVolume") throw new Error();
         const scaled = dbToPercent(log(event.volume));
@@ -266,14 +204,14 @@ export const mixerMachine = createMachine(
         };
       }),
       setTrackVolume: assign(({ context, event }) => {
-        console.log("message");
         if (!context.channels) return;
+        console.log("context.channels", context.channels);
         if (event.type !== "setTrackVolume") throw new Error();
         const scaled = dbToPercent(log(event.volume));
         context.channels[event.trackId].volume.value = scaled;
         const currentTracks = context.currentTracks;
         currentTracks[event.trackId].volume = event.volume;
-        context.currentTracks = currentTracks;
+        // context.currentTracks = currentTracks;
         return {
           currentTracks,
         };

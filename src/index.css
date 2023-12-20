@@ -223,12 +223,13 @@ h5 {
 }
 
 .range-y {
-  appearance: none;
-  background: none;
+  /* appearance: none; */
+  /* background: none; */
   rotate: 270deg;
   top: -115px;
   width: 257px;
   position: relative;
+  /* height: 300px; */
 }
 
 .volume::-webkit-slider-runnable-track {
