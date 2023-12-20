@@ -22,25 +22,19 @@ declare global {
     pitchShift: PitchShift | null;
   };
 
-  export type SourceSong = {
-    url: string;
+  type SourceSong = {
+    id: string;
+    slug: string;
+    title: string;
+    artist: string;
+    year: string;
+    studio: string;
+    location: string;
+    bpm: number;
     start: number;
     end: number;
+    tracks?: SourceTrack[];
   };
-
-  // type SourceSong = {
-  //   id: string;
-  //   slug: string;
-  //   title: string;
-  //   artist: string;
-  //   year: string;
-  //   studio: string;
-  //   location: string;
-  //   bpm: number;
-  //   start: number;
-  //   end: number;
-  //   tracks?: SourceTrack[];
-  // };
 
   type SourceTrack = {
     id: string;

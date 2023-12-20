@@ -1,23 +1,24 @@
 import { createActorContext } from "@xstate/react";
 import { assign, createMachine, fromObservable, fromPromise } from "xstate";
 import { dbToPercent, formatMilliseconds, log } from "@/utils";
-import { nelly } from "@/assets/nelly";
 import {
   start as initializeAudio,
   getContext as getAudioContext,
   Transport,
   Destination,
   Player,
+  Channel,
   Meter,
   loaded,
 } from "tone";
 import { interval, animationFrameScheduler } from "rxjs";
+import { roxanne } from "@/assets/songs";
 
 const audio = getAudioContext();
 
 type InitialConext = {
   song: SourceSong;
-  player: Player | undefined;
+  channels: Channel[] | undefined;
   meter: Meter | undefined;
   t: Transport;
   currentTime: string;
@@ -26,8 +27,8 @@ type InitialConext = {
 };
 
 const initialContext: InitialConext = {
-  song: nelly,
-  player: new Player().toDestination(),
+  song: roxanne,
+  channels: undefined,
   meter: new Meter(),
   t: Transport,
   currentTime: "00:00:00",
@@ -37,7 +38,6 @@ const initialContext: InitialConext = {
 
 export const playerMachine = createMachine(
   {
-    /** @xstate-layout N4IgpgJg5mDOIC5QAcA2BDAnmATgOgEsJUwBiCAewDsxCqA3Cga1pgBc2Cqo8cx0ImANoAGALqIUFWAU7VJIAB6IArACYANCEyIAjCJUAOPADZ1htSN0AWNWYDM1gL5OtaLLkLEyuHBXzubABm-gC2eOyc3Lz8gqISSCDI0rIE8onKCLr29nj2JgDsugWG9gCc1ur2aipaOgiGunjqIlYiZSYV9gUqZS5uGNj4fAKYeOgArmwUoehyVACyFBC0FEFBpADuOLJg8QrJMvMKmda6aqbt5SIl+YYilXWIBQXWeGoFrSKdD2pq1s5XElBp4RoJxlMZnM0otlqt1qQwftEodUulQKdzpcytdbiZ7o9tIgTAZmpZWtYygZ7IZrPZ+sCPMNYmNJtNZvMlis8NtUtxSGsgsipEcYSdELYmip7OcVLpOqVdLTrE8EAU1LkXl8VCoiiYTHSGe4hjFRhD2dDqFzaLyolBEbFhUkUscMsS-nh9DjDGYVLYcfZVS8THgta0frZ-oCBkzTeC2VDOXC41x7YKnajXRjiTK8CIZf9XvicdlVYYyio8+SbrqDA96UDjaCWebEzDrSn+ba9uIDi6xW6ECYPV6ab7-Tkg3Z3p9Wjq9QaGzGTWCxsaAEboADGTGtpCC6FgbAAYpsIBn++ilKpsngymU1MUXtl7vnVbon3hbMPeh1DOWbCNEFmTNDdt13OEHU2Lhz17FFLyocUEDlYxaxlElaRJA13xERovwKGVHDpXoXgKIDY1XPAwJ3PdYDANgADUKFQCZQh7BIRTRRDBxUB5QyVAoTGyXCzFwgpVTKQxKxaVpy3zb4znIlcW2oiDuSPChkGQSBSGNC9RSvTJeJEO9ujlbIOkE-F33KN5DAKb17OKaoHyU5tQMGTcaOTY1UwdOi2H0rikOsCxmhKF8AUaWSVSJLI-SaHIal0HULHuJdGWUjysC8tTaF8-lkEmOigqza8EFCi5dUaGkov0XDYvqGxKjyBzrgeSTywbIEqDheAUWAvsDO47MEAAWl0VUxsrMoHM6n9ZJpPpG2ArwSCG4LB2scS4uyN4RGrISzkcdK3JAwQNrKzJLAKbF8h1DUbjS1U6RMuV7wsDpRLKbIzrjVlIQ5ds4UugdRpqSsSRxX1HpKNRDFVFC810D6aihnVdD+yiEyBq1k0FUHDMQex8zumGSduVUhLKcKvhrOV5yxlscctWFuVtVNCZG8q5Sq6x8TmopnM0OKCIuexpRyFK6UEnImbNFmk25MFOfg4akLFvN+fs3UzhKEwpxp4dWhsAkfvyeXwVU60uaQuwTKh+6qiewNdvt1qcQcxpXtclaKJUzzwI7DStMgW2eIqT0de+FprCsV2mu2pp9F6EwJZqAxBMttdA+87kCqgcPRpJ4xHfJl33yRuk4-s17ywNFwXCAA */
     id: "player",
     context: initialContext,
     initial: "idle",
@@ -87,17 +87,17 @@ export const playerMachine = createMachine(
             },
           },
           playbackMode: {
-            invoke: {
-              src: "tickerActor",
-              id: "start.ticker",
-              onSnapshot: {
-                actions: assign(({ context }) => {
-                  context.meter && Destination.connect(context.meter);
-                  context.currentTime = formatMilliseconds(context.t.seconds);
-                  context.meterVal = context.meter?.getValue();
-                }),
-              },
-            },
+            // invoke: {
+            //   src: "tickerActor",
+            //   id: "start.ticker",
+            //   onSnapshot: {
+            //     actions: assign(({ context }) => {
+            //       context.meter && Destination.connect(context.meter);
+            //       contextTime = formatMilliseconds(context.t.seconds);
+            //       context.meterVal = context.meter?.getValue();
+            //     }),
+            //   },
+            // },
             initial: "stopped",
             states: {
               stopped: {
@@ -181,11 +181,18 @@ export const playerMachine = createMachine(
   {
     actions: {
       initPlayer: ({ context: { song } }) => {
+        const tracks = song.tracks;
+        let channels: Channel[] = [];
+        let players: Player[] = [];
+        tracks?.forEach((track) => {
+          channels = [...channels, new Channel().toDestination()];
+          players = [...players, new Player(track.path)];
+        });
+        players?.forEach((player, i) => {
+          channels && player.connect(channels[i]).sync().start(0);
+        });
         return {
-          player: new Player(song.url)
-            .sync()
-            .start(0, song.start)
-            .toDestination(),
+          channels,
         };
       },
       play: assign(({ context: { t } }) => {
