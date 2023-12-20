@@ -1,15 +1,21 @@
 import { MixerContext } from "@/machines/mixerMachine";
 import Loader from "@/components/Loader";
 import Transport from "@/components/Transport";
-import Fader from "@/components/Fader";
+import { Track } from "./Track";
 
 export default function Mixer() {
-  const ready = MixerContext.useSelector((state) => state.matches("ready"));
+  const state = MixerContext.useSelector((state) => state);
+  const ready = state.matches("ready");
+  const currentTracks = state.context.currentTracks;
 
   if (ready) {
     return (
       <div className="flex-y">
-        <Fader />
+        <div className="flex">
+          {currentTracks?.map((track, i) => (
+            <Track key={track.id} trackId={i} />
+          ))}
+        </div>
         <Transport />
       </div>
     );

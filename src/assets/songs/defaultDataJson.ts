@@ -5,33 +5,33 @@ export const defaultTrackData = {
   panMode: "static",
   soloMuteMode: "static",
   pan: 0,
-  soloMute: { solo: false, mute: false },
+  soloMute: JSON.stringify({ solo: false, mute: false }),
 
   // FX
-  fxNames: [],
-  delaySettings: {
+  fxNames: JSON.stringify([]),
+  delaySettings: JSON.stringify({
     playbackMode: "static",
     bypassed: false,
     mix: 0.5,
     delayTime: 1,
     feedback: 0.5,
-  },
-  reverbSettings: {
+  }),
+  reverbSettings: JSON.stringify({
     playbackMode: "static",
     bypassed: false,
     mix: 0.5,
     preDelay: 0.5,
     decay: 0.5,
-  },
-  pitchShiftSettings: {
+  }),
+  pitchShiftSettings: JSON.stringify({
     playbackMode: "static",
     bypassed: false,
     mix: 0.5,
     pitch: 5,
-  },
+  }),
 
   // PANELS
-  panelPosition: { x: 0, y: 0 },
+  panelPosition: JSON.stringify({ x: 0, y: 0 }),
   panelActive: false,
-  panelSize: { width: "325px", height: "auto" },
+  panelSize: JSON.stringify({ width: "325px", height: "auto" }),
 };

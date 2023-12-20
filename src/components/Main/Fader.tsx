@@ -1,6 +1,6 @@
 import VuMeter from "@/components/VuMeter";
 import { MixerContext } from "@/machines/mixerMachine";
-import AutomationMode from "./AutomationMode";
+import AutomationMode from "../AutomationMode";
 import useAutomationData from "@/hooks/useAutomationData";
 
 export default function Main() {
